@@ -27,7 +27,8 @@ camera frame -> red mask (HSV) -> largest blob -> steer -> stop when close
 | `controllers/scene_camera/` | Test helper: saves a 3D-view screenshot when the e-puck stops |
 | `controllers/render_own_images/` | Renders the horse and car images in `notebooks/my_images/` |
 | `worlds/part1_colour_blocks.wbt` | Part 1 world |
-| `worlds/cnn_test_horse.wbt` | Part 2 test: scaled horse model in front of the e-puck |
+| `worlds/cnn_demo_horse.wbt` | **Live demo**: horse world that stays open (no auto-quit helper) |
+| `worlds/cnn_test_horse.wbt` | Part 2 test: scaled horse model in front of the e-puck (saves a screenshot and quits) |
 | `worlds/cnn_test_block.wbt` | Part 2 test: Part 1 red block in front of the e-puck |
 | `worlds/own_images.wbt` | Scene used to render the horse and car images |
 | `results/` | Screenshots and camera images from the Webots tests |
