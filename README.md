@@ -51,7 +51,7 @@ Open `notebooks/cnn_v3.ipynb` and run all cells. In Colab, upload your photos in
    COMMAND = C:/path/to/python.exe
    ```
 3. Open `worlds/cnn_test_horse.wbt` and press play. The console prints for example
-   `RED object detected. CNN prediction: horse (99.9%)`, and the camera image is saved to
+   `RED object detected. CNN prediction: horse (99.8%)`, and the camera image is saved to
    `controllers/opencv/images/`.
 
 Without TensorFlow the controller still runs: it detects red objects, saves the images and
@@ -70,16 +70,16 @@ says that the CNN is disabled.
 
 | | |
 |---|---|
-| Test accuracy (10,000 CIFAR-10 test images) | **77.25 %** (SGD with momentum, 20 epochs) |
-| Easiest / hardest classes | truck 92.7 %, automobile 88.3 % / cat 48.8 %, bird 54.1 % |
-| Most confused | cat → dog (226), deer → horse (142), dog → horse (113) |
-| Own images | deer photo → deer 64 %, Webots car → automobile 60 %, Webots horse → horse 100 % |
-| Webots test | horse model found, approached and classified as **horse (99.9 %)**; red block → truck (67 %, not a CIFAR-10 class) |
-| Inference per image (laptop CPU) | `model.predict` 157 ms, direct Keras call 55 ms, TFLite float32 1.0 ms, TFLite int8 1.0 ms |
-| Model size | Keras 4.7 MB, TFLite int8 0.6 MB |
+| Test accuracy (10,000 CIFAR-10 test images) | **81.10 %** (SGD with momentum, dropout 0.2, 30 epochs on a Colab T4 GPU) |
+| Easiest / hardest classes | automobile 94.8 %, truck 90.5 % / deer 67.9 %, cat 69.6 % |
+| Most confused | cat → dog (170), dog → cat (98), horse → dog (88) |
+| Own images | deer photo → deer 97.4 %, Webots car → automobile 99.7 %, Webots horse → horse 99.9 % |
+| Webots test | horse model found, approached and classified as **horse (99.8 %)**; red block → cat (65 %, not a CIFAR-10 class) |
+| Inference per image (laptop CPU) | `model.predict` 68 ms, direct Keras call 16 ms, TFLite float32 0.7 ms, TFLite int8 0.7 ms |
+| Model size | Keras 2.3 MB, TFLite int8 0.6 MB |
 
-Adam stalled at 35.5 % with this model. A follow-up test traced it to the dropout of 0.5
-after the dense layer; without it Adam trains normally. See the notebook for details.
+A first run with dropout 0.5 reached 77.25 % with SGD, but Adam stalled at 35.5 %. A short test
+traced it to that dropout; with dropout 0.2 both optimisers train, and accuracy rose to 81.10 %.
 
 Two controller fixes came out of the Webots tests:
 
