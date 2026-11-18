@@ -2,6 +2,8 @@
 
 Applied Robotics and AI Project, Part 2 (Assignment 3).
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sinegan-ux/epuck-cnn-part2/blob/main/notebooks/cnn_v3.ipynb)
+
 The e-puck finds a red object with OpenCV, drives up to it, and classifies it with a
 convolutional neural network (CNN) trained on CIFAR-10. The CNN runs only when an object
 is centred and close, so normal driving and obstacle avoidance are not slowed down.
