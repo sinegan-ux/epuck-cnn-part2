@@ -17,6 +17,7 @@ camera frame -> red mask (HSV) -> largest blob -> steer -> stop when close
 
 | Path | What it is |
 |---|---|
+| `notebooks/demo_classify.ipynb` | Quick demo: upload images in Colab and the CNN shows its top-3 guesses ([open in Colab](https://colab.research.google.com/github/sinegan-ux/epuck-cnn-part2/blob/main/notebooks/demo_classify.ipynb)) |
 | `notebooks/cnn_v3.ipynb` | Trains the CNN (SGD vs Adam), evaluates it, classifies our own images, converts it to TensorFlow Lite int8 and times it |
 | `notebooks/my_images/` | Images of our own: car, horse and cat photos, plus horse and car rendered in Webots |
 | `controllers/opencv/opencv.py` | Part 2 e-puck controller: red detection, approach, CNN classification, image saving |
