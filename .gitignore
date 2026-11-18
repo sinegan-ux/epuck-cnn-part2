@@ -5,3 +5,6 @@ controllers/opencv/images/
 # Python / Jupyter
 __pycache__/
 .ipynb_checkpoints/
+# Webots per-world editor state and thumbnails
+worlds/.*.wbproj
+worlds/.*.jpg
