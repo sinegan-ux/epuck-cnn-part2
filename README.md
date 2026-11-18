@@ -18,7 +18,7 @@ camera frame -> red mask (HSV) -> largest blob -> steer -> stop when close
 | Path | What it is |
 |---|---|
 | `notebooks/cnn_v3.ipynb` | Trains the CNN (SGD vs Adam), evaluates it, classifies our own images, converts it to TensorFlow Lite int8 and times it |
-| `notebooks/my_images/` | Images of our own for the notebook (sample deer photo, horse and car rendered in Webots) |
+| `notebooks/my_images/` | Images of our own: car, horse and cat photos, plus horse and car rendered in Webots |
 | `controllers/opencv/opencv.py` | Part 2 e-puck controller: red detection, approach, CNN classification, image saving |
 | `controllers/opencv/final_model.keras` | Trained model loaded by the controller |
 | `models/final_model_int8.tflite` | Int8 TensorFlow Lite version (8× smaller, same accuracy within 0.1 points) |
@@ -73,7 +73,7 @@ says that the CNN is disabled.
 | Test accuracy (10,000 CIFAR-10 test images) | **81.10 %** (SGD with momentum, dropout 0.2, 30 epochs on a Colab T4 GPU) |
 | Easiest / hardest classes | automobile 94.8 %, truck 90.5 % / deer 67.9 %, cat 69.6 % |
 | Most confused | cat → dog (170), dog → cat (98), horse → dog (88) |
-| Own images | deer photo → deer 97.4 %, Webots car → automobile 99.7 %, Webots horse → horse 99.9 % |
+| Own images | photos: car → automobile 100 %, horse → horse 100 %, cat → cat 60 % (dog 40 %); Webots renders: horse 99.9 %, car 99.7 % |
 | Webots test | horse model found, approached and classified as **horse (99.8 %)**; red block → cat (65 %, not a CIFAR-10 class) |
 | Inference per image (laptop CPU) | `model.predict` 68 ms, direct Keras call 16 ms, TFLite float32 0.7 ms, TFLite int8 0.7 ms |
 | Model size | Keras 2.3 MB, TFLite int8 0.6 MB |
