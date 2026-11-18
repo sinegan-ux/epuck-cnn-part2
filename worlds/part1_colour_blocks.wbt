@@ -1,0 +1,89 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation -0.5773502691896257 0.5773502691896257 0.5773502691896257 2.0944
+  position -1.710303970127408e-05 -1.7103088062342346e-05 3.951458989701712
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 2 2
+}
+E-puck {
+  hidden position_0_0 362.1250170833273
+  hidden position_0_1 388.00371390617624
+  hidden translation_1 0 0.025999999999999964 0.02
+  hidden rotation_1 0 -1 0 2.2997307330887224
+  hidden translation_2 0 -0.026000000000000075 0.02
+  hidden rotation_2 0 -1 0 1.553775138958117
+  translation 0.6609634981182866 0.3460748290584607 -6.396651686356274e-05
+  rotation 1.5179075692296684e-05 7.163482278660161e-06 0.99999999985914 -2.26060357937098
+  controller "my_controller"
+  supervisor TRUE
+}
+DEF RED_BLOCK Solid {
+  translation -0.18858997722207282 0.003812960806701904 0.05
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.3 0.3 0.1
+      }
+    }
+  ]
+  name "red_block"
+  boundingObject Box {
+    size 0.3 0.3 0.1
+  }
+}
+DEF BLUE_BLOCK Solid {
+  translation -0.660277552041462 -0.7237030684402989 0.05
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 0 1
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.3 0.3 0.1
+      }
+    }
+  ]
+  name "blue_block"
+  boundingObject Box {
+    size 0.3 0.3 0.1
+  }
+}
+DEF GREEN_BLOCK Solid {
+  translation -0.7069998082302192 0.5614512526530102 0.05
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 1 0
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.3 0.3 0.1
+      }
+    }
+  ]
+  name "green_block"
+  boundingObject Box {
+    size 0.3 0.3 0.1
+  }
+}

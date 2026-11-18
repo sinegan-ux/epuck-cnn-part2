@@ -1,0 +1,7 @@
+# Machine-specific Webots Python setting (points at a local Python with TensorFlow)
+controllers/*/runtime.ini
+# Images written by the controller at run time
+controllers/opencv/images/
+# Python / Jupyter
+__pycache__/
+.ipynb_checkpoints/
