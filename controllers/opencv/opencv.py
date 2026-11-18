@@ -47,7 +47,7 @@ RESUME_AFTER_DETECTION = True     # False = stop for good at the first red objec
 MODEL_FILE = "final_model.keras"
 CLASS_NAMES = ["airplane", "automobile", "bird", "cat", "deer",
                "dog", "frog", "horse", "ship", "truck"]
-CROP_PADDING = 0.10               # extra margin around the bounding box
+CROP_PADDING = 0.50               # square crop side = longest box side x 1.5
 
 CONTROLLER_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FOLDER = os.path.join(CONTROLLER_DIR, "images")
@@ -81,12 +81,19 @@ def find_red_object(bgr):
 
 
 def crop_for_cnn(bgr, box):
-    """Crop the box (with padding) and return a 1x32x32x3 RGB float32 batch in [0, 1]."""
+    """Crop a square around the box and return a 1x32x32x3 RGB float32 batch in [0, 1].
+
+    The crop is square so the object keeps its shape when resized to 32x32
+    (stretching a wide box made a horse look like a cat), and it includes some
+    background, like the CIFAR-10 photos the CNN was trained on.
+    """
     img_h, img_w = bgr.shape[:2]
     x, y, w, h = box
-    pad_x, pad_y = int(w * CROP_PADDING), int(h * CROP_PADDING)
-    x0, y0 = max(0, x - pad_x), max(0, y - pad_y)
-    x1, y1 = min(img_w, x + w + pad_x), min(img_h, y + h + pad_y)
+    side = min(int(round(max(w, h) * (1 + CROP_PADDING))), img_w, img_h)
+    cx, cy = x + w // 2, y + h // 2
+    x0 = min(max(0, cx - side // 2), img_w - side)    # shift the square to stay inside the image
+    y0 = min(max(0, cy - side // 2), img_h - side)
+    x1, y1 = x0 + side, y0 + side
 
     crop = bgr[y0:y1, x0:x1]
     crop = cv.resize(crop, (32, 32), interpolation=cv.INTER_AREA)
