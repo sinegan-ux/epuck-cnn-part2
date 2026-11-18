@@ -25,10 +25,12 @@ CRUISE = 0.5 * MAX_SPEED
 DIST_LIMIT = 70.0                 # proximity reading that counts as "blocked"
 AVOID_PERIOD = 0.5                # s between obstacle-avoidance decisions
 
-# Red detection (HSV; OpenCV hue range is 0-179, red wraps around 0)
-RED_LOWER_1 = np.array([0, 120, 70], dtype=np.uint8)
+# Red detection (HSV; OpenCV hue range is 0-179, red wraps around 0).
+# Saturation >= 140 rejects the reddish-brown wooden floor of the default arena
+# (its saturation stays below ~125), while red objects measure 150-255.
+RED_LOWER_1 = np.array([0, 140, 40], dtype=np.uint8)
 RED_UPPER_1 = np.array([10, 255, 255], dtype=np.uint8)
-RED_LOWER_2 = np.array([170, 120, 70], dtype=np.uint8)
+RED_LOWER_2 = np.array([170, 140, 40], dtype=np.uint8)
 RED_UPPER_2 = np.array([179, 255, 255], dtype=np.uint8)
 MIN_AREA_FRAC = 0.005             # blob must cover >= 0.5 % of the image to count
 STOP_AREA_FRAC = 0.05             # stop and classify when blob covers >= 5 %
