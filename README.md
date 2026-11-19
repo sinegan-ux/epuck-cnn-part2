@@ -23,7 +23,7 @@ camera frame -> red mask (HSV) -> largest blob -> steer -> stop when close
 | `controllers/opencv/opencv.py` | Part 2 e-puck controller: red detection, approach, CNN classification, image saving |
 | `controllers/opencv/final_model_int8.tflite` | Int8 TensorFlow Lite model used by the controller (default) |
 | `controllers/opencv/final_model.keras` | Keras model (fallback) |
-| `models/final_model_int8.tflite` | Int8 TensorFlow Lite version (8× smaller, same accuracy within 0.1 points) |
+| `models/final_model_int8.tflite` | Int8 TensorFlow Lite version (4× smaller, same accuracy within 0.1 points) |
 | `controllers/my_controller/` | Part 1 controller (colour blocks, "I see ...") |
 | `controllers/scene_camera/` | Test helper: saves a 3D-view screenshot when the e-puck stops |
 | `controllers/render_own_images/` | Renders the horse and car images in `notebooks/my_images/` |
