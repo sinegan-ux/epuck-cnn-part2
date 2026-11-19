@@ -1,0 +1,42 @@
+{
+ "time_step_ms": 16,
+ "camera": "52x39",
+ "results": [
+  {
+   "mode": "colour_only",
+   "mean_ms": 0.683,
+   "p95_ms": 0.905,
+   "fps": 1464.1,
+   "cnn_calls": 0,
+   "frames": 300,
+   "real_time_ok": true
+  },
+  {
+   "mode": "keras_every_frame",
+   "mean_ms": 49.275,
+   "p95_ms": 76.908,
+   "fps": 20.3,
+   "cnn_calls": 300,
+   "frames": 300,
+   "real_time_ok": false
+  },
+  {
+   "mode": "tflite_every_frame",
+   "mean_ms": 4.126,
+   "p95_ms": 5.627,
+   "fps": 242.4,
+   "cnn_calls": 300,
+   "frames": 300,
+   "real_time_ok": true
+  },
+  {
+   "mode": "as_implemented",
+   "mean_ms": 0.752,
+   "p95_ms": 1.038,
+   "fps": 1330.0,
+   "cnn_calls": 1,
+   "frames": 300,
+   "real_time_ok": true
+  }
+ ]
+}

@@ -44,7 +44,9 @@ COOLDOWN_TIME = 4.0               # s during which red is ignored after turning 
 RESUME_AFTER_DETECTION = True     # False = stop for good at the first red object
 
 # CNN
-MODEL_FILE = "final_model.keras"
+MODEL_FILE = "final_model.keras"          # Keras model (fallback)
+TFLITE_FILE = "final_model_int8.tflite"   # int8 TensorFlow Lite model (default: faster, 4x smaller)
+USE_TFLITE = True
 CLASS_NAMES = ["airplane", "automobile", "bird", "cat", "deer",
                "dog", "frog", "horse", "ship", "truck"]
 CROP_PADDING = 0.50               # square crop side = longest box side x 1.5
@@ -102,29 +104,61 @@ def crop_for_cnn(bgr, box):
 
 
 class CnnClassifier:
-    """Wraps the trained Keras model; disabled (not crashing) if it cannot load."""
+    """Runs the trained CNN; disabled (not crashing) if no model can be loaded.
 
-    def __init__(self, model_path):
+    Tries the int8 TensorFlow Lite model first (about 0.7 ms per image, 4x
+    smaller), then falls back to the Keras model (about 16 ms per image).
+    """
+
+    def __init__(self, tflite_path, keras_path, use_tflite=True):
+        self.backend = None
         self.model = None
-        try:
-            import tensorflow as tf
-            self._tf = tf
-            self.model = tf.keras.models.load_model(model_path)
-            # One warm-up call so the first real prediction is not slow.
-            self.model(np.zeros((1, 32, 32, 3), np.float32), training=False)
-            print(f"CNN loaded: {model_path}")
-        except Exception as exc:  # missing TensorFlow, missing file, bad file
-            print(f"CNN disabled ({type(exc).__name__}: {exc}). Colour detection only.")
+        self.interp = None
+        if use_tflite and os.path.exists(tflite_path):
+            try:
+                import tensorflow as tf
+                self.interp = tf.lite.Interpreter(model_path=tflite_path)
+                self.interp.allocate_tensors()
+                self.inp = self.interp.get_input_details()[0]
+                self.out = self.interp.get_output_details()[0]
+                self.backend = "TFLite int8"
+            except Exception as exc:
+                print(f"TFLite model not usable ({type(exc).__name__}: {exc}); trying Keras.")
+        if self.backend is None:
+            try:
+                import tensorflow as tf
+                self.model = tf.keras.models.load_model(keras_path, compile=False)
+                self.backend = "Keras"
+            except Exception as exc:  # missing TensorFlow, missing file, bad file
+                print(f"CNN disabled ({type(exc).__name__}: {exc}). Colour detection only.")
+                return
+        self.predict(np.zeros((1, 32, 32, 3), np.float32))   # warm-up, so the first real call is fast
+        print(f"CNN loaded ({self.backend})")
 
     @property
     def enabled(self):
-        return self.model is not None
+        return self.backend is not None
+
+    def _probabilities(self, batch):
+        if self.interp is not None:
+            x = batch
+            if self.inp["dtype"] == np.uint8:                 # quantise the input like the converter did
+                scale, zero = self.inp["quantization"]
+                x = np.clip(np.round(batch / scale + zero), 0, 255).astype(np.uint8)
+            self.interp.set_tensor(self.inp["index"], x)
+            self.interp.invoke()
+            out = self.interp.get_tensor(self.out["index"])[0].astype(np.float32)
+            if self.out["dtype"] == np.uint8:                 # back to probabilities
+                scale, zero = self.out["quantization"]
+                out = (out - zero) * scale
+            return out
+        return self.model(batch, training=False).numpy()[0]
 
     def predict(self, batch):
         """Return (class_name, confidence) for a 1x32x32x3 batch."""
-        out = self.model(batch, training=False).numpy()[0]
-        # The notebook model ends in softmax; still handle a logits model safely.
-        if not np.isclose(out.sum(), 1.0, atol=1e-3) or out.min() < 0:
+        out = self._probabilities(batch)
+        # The model ends in softmax; still handle a logits model safely.
+        if not np.isclose(out.sum(), 1.0, atol=1e-2) or out.min() < 0:
             out = np.exp(out - out.max())
             out /= out.sum()
         idx = int(np.argmax(out))
@@ -171,7 +205,8 @@ class EpuckController:
         self.height = self.camera.getHeight()
 
         os.makedirs(SAVE_FOLDER, exist_ok=True)
-        self.classifier = CnnClassifier(os.path.join(CONTROLLER_DIR, MODEL_FILE))
+        self.classifier = CnnClassifier(os.path.join(CONTROLLER_DIR, TFLITE_FILE),
+                                        os.path.join(CONTROLLER_DIR, MODEL_FILE), USE_TFLITE)
 
         self.state = self.SEARCH
         self.state_until = 0.0

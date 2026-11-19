@@ -21,7 +21,8 @@ camera frame -> red mask (HSV) -> largest blob -> steer -> stop when close
 | `notebooks/cnn_v3.ipynb` | Trains the CNN (SGD vs Adam), evaluates it, classifies our own images, converts it to TensorFlow Lite int8 and times it |
 | `notebooks/my_images/` | Images of our own: car, horse and cat photos, plus horse and car rendered in Webots |
 | `controllers/opencv/opencv.py` | Part 2 e-puck controller: red detection, approach, CNN classification, image saving |
-| `controllers/opencv/final_model.keras` | Trained model loaded by the controller |
+| `controllers/opencv/final_model_int8.tflite` | Int8 TensorFlow Lite model used by the controller (default) |
+| `controllers/opencv/final_model.keras` | Keras model (fallback) |
 | `models/final_model_int8.tflite` | Int8 TensorFlow Lite version (8× smaller, same accuracy within 0.1 points) |
 | `controllers/my_controller/` | Part 1 controller (colour blocks, "I see ...") |
 | `controllers/scene_camera/` | Test helper: saves a 3D-view screenshot when the e-puck stops |
@@ -31,6 +32,7 @@ camera frame -> red mask (HSV) -> largest blob -> steer -> stop when close
 | `worlds/cnn_test_horse.wbt` | Part 2 test: scaled horse model in front of the e-puck (saves a screenshot and quits) |
 | `worlds/cnn_test_block.wbt` | Part 2 test: Part 1 red block in front of the e-puck |
 | `worlds/own_images.wbt` | Scene used to render the horse and car images |
+| `worlds/fps_benchmark.wbt` + `controllers/fps_benchmark/` | Frame-rate test of the control loop with and without the CNN |
 | `results/` | Screenshots and camera images from the Webots tests |
 | `presentation/` | Final slides |
 
@@ -67,6 +69,50 @@ says that the CNN is disabled.
 | `STOP_AREA_FRAC` | 0.05 | Stop and classify when the object covers 5 % of the image |
 | `CENTRE_TOLERANCE` | 0.15 | Object must be within 15 % of the image centre |
 | `RESUME_AFTER_DETECTION` | True | Pause 2 s, turn away and keep searching (False = stop for good) |
+| `USE_TFLITE` | True | Use the int8 TensorFlow Lite model (falls back to the Keras model if it cannot load) |
+
+## Controller design
+
+| Function / class | Role |
+|---|---|
+| `webots_image_to_bgr()` | Converts the camera's BGRA buffer to an OpenCV image |
+| `find_red_object()` | HSV red mask, morphological opening, largest contour → bounding box and area; `None` when no red object is seen |
+| `crop_for_cnn()` | Square crop around the box (keeps the object's shape), resize to 32×32, RGB, scale to [0, 1] |
+| `CnnClassifier` | Loads TFLite int8 or Keras; returns class and confidence; disables itself cleanly if TensorFlow or the model is missing |
+| `EpuckController` | State machine: **search** (wander, avoid obstacles) → **approach** (steer to the red object) → **classify** (stop, CNN, save image) → **turn away** (2 s pause, rotate, ignore red for 4 s) → search |
+
+Error handling: no camera image or no red object → keep searching; model missing → colour-only mode; image save failure → message, no crash.
+
+## Hardware notes (e-puck in Webots R2023b)
+
+| Device | Details | Used for |
+|---|---|---|
+| Camera `camera` | 52×39 pixels, BGRA, about 0.84 rad field of view | Red detection and CNN input |
+| Wheel motors `left wheel motor`, `right wheel motor` | Velocity control, maximum 6.28 rad/s (position set to infinity) | Cruise at 50 % speed; steering by speed difference |
+| Proximity sensors `ps0`–`ps7` | Infrared, larger value = closer | Part 2 uses ps0/ps1 (front right) and ps6/ps7 (front left), threshold 70 |
+| Control time step | 32 ms (`TIME_STEP`), world basic time step 16 ms | |
+
+## Part 1 world setup (`worlds/part1_colour_blocks.wbt`, `controllers/my_controller`)
+
+* The controller is a **Supervisor** (`supervisor TRUE` on the E-puck node) so it can create objects.
+* At start it removes old blocks and spawns a **red, a blue and a green block, each 0.3 × 0.3 × 0.1 m**
+  (Solid with a matching box `boundingObject`), at **random non-overlapping positions**: at least 0.2 m
+  from the walls, 0.25 m from the robot and 0.4 m from each other. The arena is 2 × 2 m.
+* A colour counts as seen when it covers **at least 2 %** of the camera image; the robot then prints
+  `I see <colour>` and a summary of encountered and not-yet-encountered colours, and stops once all three
+  are found.
+
+## Frame-rate test (`worlds/fps_benchmark.wbt`, `controllers/fps_benchmark`)
+
+The e-puck stands in front of the horse and processes 300 real camera frames in each mode; only the
+controller's own work per frame is timed (laptop CPU, control step 16 ms). Results: `results/fps_benchmark.json`.
+
+| Mode | ms per frame | Frame rate | Real time (< 16 ms)? |
+|---|---|---|---|
+| Colour detection only | 0.68 | ~1,460 FPS | yes |
+| Keras CNN on every frame | 49.3 | ~20 FPS | **no** |
+| TFLite int8 CNN on every frame | 4.1 | ~240 FPS | yes |
+| As implemented (CNN only when an object is close and centred) | 0.75 | ~1,330 FPS | yes |
 
 ## Results
 
