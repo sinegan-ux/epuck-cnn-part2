@@ -34,7 +34,8 @@ camera frame -> red mask (HSV) -> largest blob -> steer -> stop when close
 | `worlds/own_images.wbt` | Scene used to render the horse and car images |
 | `worlds/fps_benchmark.wbt` + `controllers/fps_benchmark/` | Frame-rate test of the control loop with and without the CNN |
 | `results/` | Screenshots and camera images from the Webots tests |
-| `presentation/` | Final slides |
+| `presentation/` | Final slides (Assignment 3) |
+| `report/` | Final project report (Assignment 4) |
 
 ## Running it
 
